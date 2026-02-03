@@ -5,5 +5,6 @@ import (
 )
 
 func main() {
-	finance.FetchAndPrintNVDA()
+	finance.FetchBasics("NVDA")
+	finance.FetchBasics("GOOG")
 }

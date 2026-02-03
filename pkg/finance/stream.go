@@ -54,6 +54,11 @@ func GetStockQuote(symbol string, apiKey string) (*QuoteData, error) {
 		return nil, fmt.Errorf("failed to parse JSON: %w", err)
 	}
 	
+	// Check if the response is empty (rate limit or error)
+	if quote.GlobalQuote.Symbol == "" {
+		return nil, fmt.Errorf("empty response - possible rate limit or invalid symbol")
+	}
+	
 	return &quote.GlobalQuote, nil
 }
 
@@ -62,8 +67,8 @@ func GetAPIKey() string {
 	return os.Getenv("ALPHA_VANTAGE_API_KEY")
 }
 
-// FetchAndPrintNVDA fetches NVDA stock data and prints it
-func FetchAndPrintNVDA() {
+// FetchBasics fetches stock data for a given ticker and prints it
+func FetchBasics(tickr string) {
 	// Load .env file
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: Error loading .env file:", err)
@@ -75,15 +80,16 @@ func FetchAndPrintNVDA() {
 		log.Fatal("Please set ALPHA_VANTAGE_API_KEY in .env file")
 	}
 
-	// Fetch NVDA stock data
-	fmt.Println("Fetching NVDA stock data from Alpha Vantage...")
-	quote, err := GetStockQuote("NVDA", apiKey)
+	// Fetch stock data
+	fmt.Printf("Fetching %s stock data from Alpha Vantage...\n", tickr)
+	quote, err := GetStockQuote(tickr, apiKey)
 	if err != nil {
-		log.Fatal("Error fetching stock data:", err)
+		log.Println("Error fetching stock data:", err)
+		return
 	}
 
-	// Print the NVDA data
-	fmt.Printf("\n=== NVDA Stock Quote ===\n")
+	// Print the stock data
+	fmt.Printf("\n%s\n", tickr)
 	fmt.Printf("Symbol: %s\n", quote.Symbol)
 	fmt.Printf("Price: $%s\n", quote.Price)
 	fmt.Printf("Open: $%s\n", quote.Open)
@@ -94,4 +100,7 @@ func FetchAndPrintNVDA() {
 	fmt.Printf("Previous Close: $%s\n", quote.PreviousClose)
 	fmt.Printf("Change: %s (%s)\n", quote.Change, quote.ChangePercent)
 	fmt.Println("========================\n")
+	
+	// Rate limiting: wait 1.5 seconds between requests
+	time.Sleep(1500 * time.Millisecond)
 }
