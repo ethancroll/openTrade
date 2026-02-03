@@ -1,0 +1,11 @@
+bin/
+*.exe
+main
+*.env
+config.yaml
+.DS_Store
+.vscode/
+.idea/
+vendor/
+go.work
+go.work.sum
